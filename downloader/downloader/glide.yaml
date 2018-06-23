@@ -1,0 +1,6 @@
+package: .
+import:
+- package: github.com/anacrolix/torrent
+  subpackages:
+  - cmd/torrent
+- package: github.com/aws/aws-sdk-go
