@@ -4,3 +4,4 @@ import:
   subpackages:
   - cmd/torrent
 - package: github.com/aws/aws-sdk-go
+- package: github.com/satori/go.uuid
