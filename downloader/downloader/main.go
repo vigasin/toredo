@@ -14,21 +14,23 @@ import (
 	"archive/tar"
 	"io"
 	"path/filepath"
+	"github.com/satori/go.uuid"
 )
 
 const (
-	QueueUrl    = "https://sqs.us-west-1.amazonaws.com/009544449203/toredo-download-queue"
-	Region      = "us-west-1"
-	CredPath    = "/Users/ivigasin/.aws/credentials"
-	CredProfile = "default"
+	DownloadQueueUrl = "https://sqs.us-west-1.amazonaws.com/009544449203/toredo-download-queue"
+	TransferQueueUrl = "https://sqs.us-west-1.amazonaws.com/009544449203/toredo-transfer-queue"
+	Region           = "us-west-1"
+	CredPath         = "/Users/ivigasin/.aws/credentials"
+	CredProfile      = "default"
 )
 
 type Message struct {
-	Url string
+	Url       string
 	RequestId string
 }
 
-func addFile(tw * tar.Writer, path string) error {
+func addFile(tw *tar.Writer, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -129,10 +131,14 @@ func downloadTorrent(requestId string, url string) string {
 	return tarName
 }
 
+type TransferMessage struct {
+	RequestId string
+	Url string
+}
+
 func main() {
 
-
-	for ; ;  {
+	for ; ; {
 		sess := session.New(&aws.Config{
 			Region:      aws.String(Region),
 			Credentials: credentials.NewSharedCredentials(CredPath, CredProfile),
@@ -143,7 +149,7 @@ func main() {
 
 		// Receive message
 		receiveParams := &sqs.ReceiveMessageInput{
-			QueueUrl:            aws.String(QueueUrl),
+			QueueUrl:            aws.String(DownloadQueueUrl),
 			MaxNumberOfMessages: aws.Int64(3),
 			VisibilityTimeout:   aws.Int64(30),
 			WaitTimeSeconds:     aws.Int64(20),
@@ -163,15 +169,39 @@ func main() {
 			fmt.Println(tarFile)
 
 			deleteParams := &sqs.DeleteMessageInput{
-				QueueUrl:      aws.String(QueueUrl),  // Required
-				ReceiptHandle: message.ReceiptHandle, // Required
-
+				QueueUrl:      aws.String(DownloadQueueUrl), // Required
+				ReceiptHandle: message.ReceiptHandle,        // Required
 			}
 			_, err = svc.DeleteMessage(deleteParams) // No response returned when succeeded.
 			if err != nil {
 				log.Println(err)
 			}
 			fmt.Printf("[Delete message] \nMessage ID: %s has beed deleted.\n\n", *message.MessageId)
+
+			baseUrl := "http://enk.me/vivo"
+			requestId, err := uuid.NewV4()
+			transferMessage := TransferMessage{
+				RequestId: requestId.String(),
+				Url: fmt.Sprintf("%s/%s", baseUrl, tarFile),
+			}
+
+			messageJson, err := json.Marshal(transferMessage)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			// Send message
+			sendParams := &sqs.SendMessageInput{
+				QueueUrl:    aws.String(TransferQueueUrl),
+				MessageBody: aws.String(string(messageJson)),
+			}
+
+			sendResp, err := svc.SendMessage(sendParams)
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Printf("[Send message] \n%v \n\n", sendResp)
 		}
 	}
 
