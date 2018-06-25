@@ -1,3 +1,6 @@
 .terraform
 .idea
 downloader/downloader/vendor
+downloader/downloader/downloader
+client/client
+transferer/transferer/transferer

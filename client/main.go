@@ -28,22 +28,22 @@ func main() {
 
 	requestId, err := uuid.NewV4()
 	if err != nil {
-		fmt.Printf("Couldn't generate request id. Error: %s", err)
+		fmt.Printf("Couldn't generate request id. Error: %s\n", err)
 		return
 	}
 
 	message := &Message{Url: url, RequestId: requestId.String()}
 	messageJson, err := json.Marshal(message)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Couldn't marshal message. Error: %s\n", err)
 		return
 	}
 
-	sess := session.New(&aws.Config{
+	sess := session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(Region),
 		Credentials: credentials.NewSharedCredentials(CredPath, CredProfile),
 		MaxRetries:  aws.Int(5),
-	})
+	}))
 
 	svc := sqs.New(sess)
 

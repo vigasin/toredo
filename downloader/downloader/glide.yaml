@@ -1,7 +1,8 @@
 package: .
 import:
-- package: github.com/anacrolix/torrent
+- package: github.com/anacrolix/torrent_manager
   subpackages:
-  - cmd/torrent
+  - cmd/torrent_manager
 - package: github.com/aws/aws-sdk-go
 - package: github.com/satori/go.uuid
+- package: gopkg.in/yaml.v2
