@@ -1,14 +1,16 @@
 package tar
 
 import (
-	"os"
-	"log"
 	"archive/tar"
-	"path/filepath"
 	"io"
+	"log"
+	"os"
+	"path/filepath"
+	"fmt"
+	"path"
 )
 
-func TarFolder(archiveName string, src string) {
+func TarFolder(archiveName string, dir string, src string) {
 	file, err := os.Create(archiveName)
 	if err != nil {
 		log.Fatalln(err)
@@ -18,7 +20,7 @@ func TarFolder(archiveName string, src string) {
 	tw := tar.NewWriter(file)
 	defer tw.Close()
 
-	filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
+	filepath.Walk(path.Join(dir, src), func(file string, fi os.FileInfo, err error) error {
 
 		// return on any error
 		if err != nil {
@@ -27,12 +29,13 @@ func TarFolder(archiveName string, src string) {
 
 		// create a new dir/file header
 		header, err := tar.FileInfoHeader(fi, fi.Name())
+		fmt.Println(fi.Name())
 		if err != nil {
 			return err
 		}
 
 		// update the name to correctly reflect the desired destination when untaring
-		header.Name = file // strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
+		header.Name = file[len(dir)+1:] // strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
 
 		// write the header
 		if err := tw.WriteHeader(header); err != nil {
@@ -60,4 +63,64 @@ func TarFolder(archiveName string, src string) {
 	})
 }
 
+func UntarFolder(archiveName string, dst string) error {
+	f, err := os.Open(archiveName)
+	if err != nil {
+		return err
+	}
 
+	defer f.Close()
+
+	tr := tar.NewReader(f)
+
+	for {
+		header, err := tr.Next()
+
+		switch {
+
+		// if no more files are found return
+		case err == io.EOF:
+			return nil
+
+			// return any other error
+		case err != nil:
+			return err
+
+			// if the header is nil, just skip it (not sure how this happens)
+		case header == nil:
+			continue
+		}
+
+		// the target location where the dir/file should be created
+		target := filepath.Join(dst, header.Name)
+
+		// the following switch could also be done using fi.Mode(), not sure if there
+		// a benefit of using one vs. the other.
+		// fi := header.FileInfo()
+
+		// check the file type
+		switch header.Typeflag {
+
+		// if its a dir and it doesn't exist create it
+		case tar.TypeDir:
+			if _, err := os.Stat(target); err != nil {
+				if err := os.MkdirAll(target, 0755); err != nil {
+					return err
+				}
+			}
+
+			// if it's a file create it
+		case tar.TypeReg:
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			if err != nil {
+				return err
+			}
+			defer f.Close()
+
+			// copy over contents
+			if _, err := io.Copy(f, tr); err != nil {
+				return err
+			}
+		}
+	}
+}

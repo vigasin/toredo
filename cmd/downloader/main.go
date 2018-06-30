@@ -4,45 +4,31 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/vigasin/toredo"
+	"github.com/vigasin/toredo/torrent_manager"
+	"encoding/json"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/satori/go.uuid"
-	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"./torrent_manager"
+	"github.com/satori/go.uuid"
+	"os"
 )
 
 const (
 	DownloadQueueUrl = "https://sqs.us-west-1.amazonaws.com/009544449203/toredo-download-queue"
 	TransferQueueUrl = "https://sqs.us-west-1.amazonaws.com/009544449203/toredo-transfer-queue"
 	Region           = "us-west-1"
-	CredPath         = "/Users/ivigasin/.aws/credentials"
+	CredPath         = "credentials"
 	CredProfile      = "default"
-)
-
-const (
-	MsgDownload = "Download"
-	MsgRemove   = "Remove"
-	MsgInfo     = "Info"
 )
 
 type Config struct {
 	DownloadPath string
+	PublicPath   string
 	PublicUrl    string
-}
-
-type Message struct {
-	RequestId   string
-	MessageType string // Download, Remove, Info
-	Url         string
-}
-
-type TransferMessage struct {
-	RequestId string
-	Url       string
 }
 
 func deleteMessage(svc *sqs.SQS, queue string, message *sqs.Message) {
@@ -72,47 +58,37 @@ func sendMessage(svc *sqs.SQS, queue string, body string) {
 	fmt.Printf("[Send message] \n%v \n\n", sendResp)
 }
 
-func processMessage(config Config, manager *torrent_manager.TorrentManager, svc *sqs.SQS, message *sqs.Message) {
-	msg := Message{}
-	err := json.Unmarshal(([]byte)(*message.Body), &msg)
-
-	if err != nil {
-		log.Printf("Can't unmarshal message. Error: %s\n", err)
-		return
-	}
-
+func processMessage(config Config, manager *torrent_manager.TorrentManager, svc *sqs.SQS, msg toredo.DownloaderMessage) {
 	switch msg.MessageType {
-	case MsgDownload:
+	case toredo.MsgDownload:
 		{
 			tarFile := manager.DownloadTorrent(msg.RequestId, msg.Url)
 			fmt.Println(tarFile)
+
+			requestId, err := uuid.NewV4()
+			transferMessage := toredo.TransfererMessage{
+				RequestId: requestId.String(),
+				Url:       fmt.Sprintf("%s/%s", config.PublicUrl, tarFile),
+			}
+
+			messageJson, err := json.Marshal(transferMessage)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			sendMessage(svc, TransferQueueUrl, string(messageJson))
 		}
 
-	case MsgInfo:
+	case toredo.MsgInfo:
 		{
-
+			manager.WriteStatus(os.Stdout)
 		}
 	}
-
-	deleteMessage(svc, DownloadQueueUrl, message)
-
-	requestId, err := uuid.NewV4()
-	transferMessage := TransferMessage{
-		RequestId: requestId.String(),
-		Url:       fmt.Sprintf("%s/%s", config.PublicUrl, tarFile),
-	}
-
-	messageJson, err := json.Marshal(transferMessage)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	sendMessage(svc, TransferQueueUrl, string(messageJson))
 }
 
 func main() {
-	content, err := ioutil.ReadFile("config.yaml")
+	content, err := ioutil.ReadFile("downloader.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,13 +99,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	fmt.Printf("--- t:\n%v\n\n", config)
 
-	if true {
-		return
-	}
-
-	manager := torrent_manager.New()
+	manager := torrent_manager.New(config.DownloadPath, config.PublicPath)
 
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(Region),
@@ -139,7 +110,7 @@ func main() {
 
 	svc := sqs.New(sess)
 
-	for ; ; {
+	for {
 		// Receive message
 		receiveParams := &sqs.ReceiveMessageInput{
 			QueueUrl:            aws.String(DownloadQueueUrl),
@@ -151,10 +122,21 @@ func main() {
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Printf("[Receive message] \n%v \n\n", receiveResp)
 
 		for _, message := range receiveResp.Messages {
-			go processMessage(config, manager, svc, message)
+			msg := toredo.DownloaderMessage{}
+			err := json.Unmarshal(([]byte)(*message.Body), &msg)
+
+			if err != nil {
+				log.Printf("Can't unmarshal message. Error: %s\n", err)
+				return
+			}
+
+			fmt.Printf("[Receive message] \n%v \n\n", msg)
+
+			// TODO: save to internal database first
+			deleteMessage(svc, DownloadQueueUrl, message)
+			go processMessage(config, manager, svc, msg)
 		}
 	}
 

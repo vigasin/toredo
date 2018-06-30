@@ -1,8 +1,145 @@
-hash: 4fb5196b4be53c3a664181b4eda89f33a448f8c25bcefaf290a2421f8382a82f
-updated: 2018-06-23T01:12:05.784567-07:00
+hash: d42af56196f3e65187dcbf6a07343aec6d70f0f0d1cfee49ab82b099ddbc988a
+updated: 2018-06-28T16:53:36.822292-07:00
 imports:
+- name: github.com/anacrolix/dht
+  version: 920ba2813ef3fb7ce83c1bc8735d58b6bdbb2db2
+  subpackages:
+  - krpc
+- name: github.com/anacrolix/go-libutp
+  version: 740b2376b8c92424ced71f875ae698abd6361fd0
+- name: github.com/anacrolix/log
+  version: 2323884b361d84490c06cf5f4e8f8f3f8b6abd67
+- name: github.com/anacrolix/missinggo
+  version: 7cf54799d7d65e94d17f90d51ac4dee79f57af04
+  subpackages:
+  - bitmap
+  - expect
+  - httptoo
+  - inproc
+  - iter
+  - mime
+  - orderedmap
+  - perf
+  - pproffd
+  - prioritybitmap
+  - pubsub
+  - resource
+  - slices
+  - x
+- name: github.com/anacrolix/mmsg
+  version: a4a3ba1fc8bb6400db01c47508156bf9c67156c6
+  subpackages:
+  - socket
+- name: github.com/anacrolix/sync
+  version: 3c4cb11f5a01b7769739b3a408c493e947fb839f
 - name: github.com/anacrolix/torrent
   version: fefeef4ee9eb72f1d245625eac03c289886121ec
   subpackages:
-  - cmd/torrent
+  - bencode
+  - cmd/torrent_manager
+  - iplist
+  - logonce
+  - metainfo
+  - mmap_span
+  - mse
+  - peer_protocol
+  - storage
+  - tracker
+- name: github.com/anacrolix/utp
+  version: 9e0e1d1d0572f5a09a669d4ea0372d8e8078dcc9
+- name: github.com/aws/aws-sdk-go
+  version: b86699face65311cd528d16746c8aee338af302c
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/csm
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/sdkio
+  - internal/sdkrand
+  - internal/shareddefaults
+  - private/protocol
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
+  - service/sqs
+  - service/sts
+- name: github.com/boltdb/bolt
+  version: fd01fc79c553a8e99d512a07e8e0c63d4a3ccfc5
+- name: github.com/bradfitz/iter
+  version: 454541ec3da2a73fc34fd049b19ee5777bf19345
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
+- name: github.com/dustin/go-humanize
+  version: 02af3965c54e8cacf948b97fef38925c4120652c
+- name: github.com/edsrzf/mmap-go
+  version: 0bce6a6887123b67a60366d2c9fe2dfb74289d2e
+- name: github.com/elgatito/upnp
+  version: e914aa6ede1ae0b360f265d877a9a492e2ac7eac
+- name: github.com/glycerine/go-unsnap-stream
+  version: 9f0cb55181dd3a0a4c168d3dbc72d4aca4853126
+- name: github.com/go-ini/ini
+  version: cec2bdc49009247305a260b082a18e802d0fe292
+- name: github.com/golang/snappy
+  version: 2e65f85255dbc3072edf28d6b5b8efc472979f5a
+- name: github.com/google/btree
+  version: e89373fe6b4a7413d7acd6da1725b83ef713e6e4
+- name: github.com/huandu/xstrings
+  version: 7bb0250b58e5c15670406e6f93ffda43281305b1
+- name: github.com/jmespath/go-jmespath
+  version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
+- name: github.com/mattn/go-sqlite3
+  version: f08fefa53a0bd1bb258c8aa8cdc46ef8306e462c
+- name: github.com/mschoch/smat
+  version: 90eadee771aeab36e8bf796039b8c261bebebe4f
+- name: github.com/philhofer/fwd
+  version: bb6d471dc95d4fe11e432687f8b70ff496cf3136
+- name: github.com/RoaringBitmap/roaring
+  version: c96abf92ffd52c11eb00488c532e732d3bf8c71b
+- name: github.com/ryszard/goskiplist
+  version: 2dfbae5fcf46374f166f8969cb07e167f1be6273
+  subpackages:
+  - skiplist
+- name: github.com/satori/go.uuid
+  version: 36e9d2ebbde5e3f13ab2e25625fd453271d6522e
+- name: github.com/spaolacci/murmur3
+  version: f09979ecbc725b9e6d41a297405f65e7e8804acc
+- name: github.com/tinylib/msgp
+  version: 54a3260d60646faaba5873316fa01ac61d49c1d5
+  subpackages:
+  - msgp
+- name: github.com/willf/bitset
+  version: 8ce1146b8621c95164efd9c8b1124cfa9b8afb4e
+- name: github.com/willf/bloom
+  version: 54e3b963ee1652b06c4562cb9b6020ebc6e36e59
+- name: golang.org/x/net
+  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
+  subpackages:
+  - context
+  - proxy
+- name: golang.org/x/sys
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  subpackages:
+  - unix
+- name: golang.org/x/time
+  version: fbb02b2291d28baffd63558aa44b4b56f178d650
+  subpackages:
+  - rate
+- name: gopkg.in/yaml.v2
+  version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 testImports: []

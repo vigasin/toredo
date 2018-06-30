@@ -4,18 +4,19 @@ import (
 	"fmt"
 	"log"
 
+	"encoding/json"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"encoding/json"
-	"os"
-	"strings"
-	"net/http"
-	"time"
-	"strconv"
 	"io"
+	"net/http"
+	"os"
 	"runtime"
+	"strconv"
+	"strings"
+	"time"
+	"github.com/vigasin/toredo/tar"
 )
 
 const (
@@ -165,49 +166,51 @@ type TransferMessage struct {
 }
 
 func main() {
-	if true {
-		downloadFile("https://la.hdw.mx/~ivigasin/from_logs.tar.gz")
-	} else {
-		for ; ; {
-			sess := session.New(&aws.Config{
-				Region:      aws.String(Region),
-				Credentials: credentials.NewSharedCredentials(CredPath, CredProfile),
-				MaxRetries:  aws.Int(5),
-			})
+	for {
+		sess := session.New(&aws.Config{
+			Region:      aws.String(Region),
+			Credentials: credentials.NewSharedCredentials(CredPath, CredProfile),
+			MaxRetries:  aws.Int(5),
+		})
 
-			svc := sqs.New(sess)
+		svc := sqs.New(sess)
 
-			// Receive message
-			receiveParams := &sqs.ReceiveMessageInput{
-				QueueUrl:            aws.String(QueueUrl),
-				MaxNumberOfMessages: aws.Int64(3),
-				VisibilityTimeout:   aws.Int64(30),
-				WaitTimeSeconds:     aws.Int64(20),
+		// Receive message
+		receiveParams := &sqs.ReceiveMessageInput{
+			QueueUrl:            aws.String(QueueUrl),
+			MaxNumberOfMessages: aws.Int64(3),
+			VisibilityTimeout:   aws.Int64(30),
+			WaitTimeSeconds:     aws.Int64(20),
+		}
+		receiveResp, err := svc.ReceiveMessage(receiveParams)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// Delete message
+		for _, message := range receiveResp.Messages {
+			msg := TransferMessage{}
+			err := json.Unmarshal(([]byte)(*message.Body), &msg)
+
+			fmt.Printf("[Receive message] \n%v \n\n", msg)
+
+			deleteParams := &sqs.DeleteMessageInput{
+				QueueUrl:      aws.String(QueueUrl),  // Required
+				ReceiptHandle: message.ReceiptHandle, // Required
 			}
-			receiveResp, err := svc.ReceiveMessage(receiveParams)
+
+			_, err = svc.DeleteMessage(deleteParams) // No response returned when succeeded.
 			if err != nil {
 				log.Println(err)
 			}
-			fmt.Printf("[Receive message] \n%v \n\n", receiveResp)
+			fmt.Printf("[Delete message] \nMessage ID: %s has beed deleted.\n\n", *message.MessageId)
 
-			// Delete message
-			for _, message := range receiveResp.Messages {
-				msg := TransferMessage{}
-				err := json.Unmarshal(([]byte)(*message.Body), &msg)
+			file := downloadFile(msg.Url)
+			fmt.Println(file)
 
-				file := downloadFile(msg.Url)
-				fmt.Println(file)
+			tar.UntarFolder(file, ".")
 
-				deleteParams := &sqs.DeleteMessageInput{
-					QueueUrl:      aws.String(QueueUrl),  // Required
-					ReceiptHandle: message.ReceiptHandle, // Required
-				}
-				_, err = svc.DeleteMessage(deleteParams) // No response returned when succeeded.
-				if err != nil {
-					log.Println(err)
-				}
-				fmt.Printf("[Delete message] \nMessage ID: %s has beed deleted.\n\n", *message.MessageId)
-			}
+			os.Remove(file)
 		}
 	}
 }
