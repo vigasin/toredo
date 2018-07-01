@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"io"
 )
 
 type TorrentManager struct {
@@ -41,15 +42,14 @@ func (m *TorrentManager) DownloadTorrent(requestId string, url string) string {
 	t, err := m.client.AddMagnet(url)
 
 	if err != nil {
-		log.Fatalf("error adding magnet: %s", err)
+		log.Printf("Error adding magnet: %s\n", err)
 	}
 
 	<-t.GotInfo()
 	t.DownloadAll()
 
+	// TODO: Should wait for just this torrent, not all
 	m.client.WaitAll()
-
-	path.Join()
 
 	tarName := fmt.Sprintf("%s.tar", requestId)
 	tarPath := path.Join(m.publicPath, tarName)
@@ -61,6 +61,7 @@ func (m *TorrentManager) DownloadTorrent(requestId string, url string) string {
 
 	return tarName
 }
-func (m *TorrentManager) WriteStatus(file *os.File) {
-	m.client.WriteStatus(file)
+
+func (m *TorrentManager) WriteStatus(w io.Writer) {
+	m.client.WriteStatus(w)
 }

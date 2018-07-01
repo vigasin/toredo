@@ -6,3 +6,5 @@ import:
 - package: github.com/aws/aws-sdk-go
 - package: github.com/satori/go.uuid
 - package: gopkg.in/yaml.v2
+- package: github.com/jessevdk/go-flags
+- package: github.com/aws/aws-lambda-go

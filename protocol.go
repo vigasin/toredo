@@ -1,19 +1,33 @@
 package toredo
 
 const (
-	MsgDownload = "Download"
-	MsgRemove   = "Remove"
-	MsgInfo     = "Info"
+	MsgDownloaderInDownload = "Download"
+	MsgDownloaderInRemove   = "Remove"
+	MsgDownloaderInInfo     = "Info"
 )
 
-type DownloaderMessage struct {
-	RequestId   string
+const (
+	MsgDownloaderOutDownloaded = "Downloaded"
+	MsgDownloaderOutRemoved    = "Removed"
+	MsgDownloaderOutGotInfo    = "GotInfo"
+)
+
+type DownloaderInMessage struct {
 	MessageType string // Download, Remove, Info
-	Url         string
+	RequestId   string
+
+	Url string
+}
+
+type DownloaderOutMessage struct {
+	MessageType string // Downloaded, Removed, GotInfo
+	RequestId   string
+
+	Url     string
+	Message string
 }
 
 type TransfererMessage struct {
 	RequestId string
 	Url       string
 }
-

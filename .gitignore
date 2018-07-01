@@ -1,7 +1,12 @@
 .terraform
 .idea
 vendor
+
 cmd/downloader/downloader
 cmd/client/client
 cmd/transferer/transferer
+
+cmd/manager/manager
+cmd/manager/manager-*
+
 configs/credentials

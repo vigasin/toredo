@@ -1,5 +1,5 @@
-hash: d42af56196f3e65187dcbf6a07343aec6d70f0f0d1cfee49ab82b099ddbc988a
-updated: 2018-06-28T16:53:36.822292-07:00
+hash: 12bcb3af1dc4b944a0ce426872f630f6d3255d64b294a810cbce2e158a6c9f6e
+updated: 2018-06-30T19:49:45.334245-07:00
 imports:
 - name: github.com/anacrolix/dht
   version: 920ba2813ef3fb7ce83c1bc8735d58b6bdbb2db2
@@ -47,6 +47,12 @@ imports:
   - tracker
 - name: github.com/anacrolix/utp
   version: 9e0e1d1d0572f5a09a669d4ea0372d8e8078dcc9
+- name: github.com/aws/aws-lambda-go
+  version: 3574a030467ca312f135e64a4a1bf293a216febd
+  subpackages:
+  - lambda
+  - lambda/messages
+  - lambdacontext
 - name: github.com/aws/aws-sdk-go
   version: b86699face65311cd528d16746c8aee338af302c
   subpackages:
@@ -101,6 +107,8 @@ imports:
   version: e89373fe6b4a7413d7acd6da1725b83ef713e6e4
 - name: github.com/huandu/xstrings
   version: 7bb0250b58e5c15670406e6f93ffda43281305b1
+- name: github.com/jessevdk/go-flags
+  version: 1c38ed7ad0cc3d9e66649ac398c30e45f395c4eb
 - name: github.com/jmespath/go-jmespath
   version: c2b33e8439af944379acbdd9c3a5fe0bc44bd8a5
 - name: github.com/mattn/go-sqlite3

@@ -6,18 +6,18 @@ provider "aws" {
 # Need to comment this initially
 terraform {
   backend "s3" {
-    encrypt = "true"
-    bucket = "toredo-state"
-    key = "global/terraform.tfstate"
-    region = "us-west-1"
+    encrypt        = "true"
+    bucket         = "toredo-state"
+    key            = "global/terraform.tfstate"
+    region         = "us-west-1"
     dynamodb_table = "toredo-state-lock"
   }
 }
 
 resource "aws_dynamodb_table" "toredo_state_lock" {
-  name = "toredo-state-lock"
-  hash_key = "LockID"
-  read_capacity = 20
+  name           = "toredo-state-lock"
+  hash_key       = "LockID"
+  read_capacity  = 20
   write_capacity = 20
 
   attribute {
@@ -45,3 +45,16 @@ resource "aws_s3_bucket" "toredo_state" {
     Name = "S3 Remote Terraform State Store"
   }
 }
+
+resource "aws_s3_bucket" "toredo_lambda" {
+  bucket = "toredo-lambda"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  tags {
+    Name = "Bucket for toredo lambda packages"
+  }
+}
+

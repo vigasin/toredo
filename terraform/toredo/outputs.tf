@@ -14,6 +14,10 @@ output "transferer_user_name" {
   value = "${aws_iam_user.toredo_transferer.name}"
 }
 
+output "transferer_user_id" {
+  value = "${aws_iam_access_key.toredo_transferer.id}"
+}
+
 output "transferer_user_secret" {
   value = "${aws_iam_access_key.toredo_transferer.secret}"
 }
