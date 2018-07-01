@@ -1,0 +1,3 @@
+downloadpath: "<path where to download torrents>"
+publicpath: "<path where to put tars"
+publicurl: "<http/https url to publicpath>"
