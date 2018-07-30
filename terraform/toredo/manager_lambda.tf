@@ -2,7 +2,7 @@ variable "manager_version" {
   default = "0.2"
 }
 
-resource "aws_lambda_function" "health" {
+resource "aws_lambda_function" "manager" {
   s3_bucket     = "${data.terraform_remote_state.global.lambda_bucket}"
   s3_key        = "manager/manager-v${var.manager_version}.zip"
   function_name = "HandleApiEvent"

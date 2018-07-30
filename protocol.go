@@ -1,5 +1,13 @@
 package toredo
 
+type ApiRequest struct {
+	Url string
+}
+
+type ApiResponse struct {
+	RequestId string
+}
+
 const (
 	MsgDownloaderInDownload = "Download"
 	MsgDownloaderInRemove   = "Remove"

@@ -18,15 +18,7 @@ const (
 	Region               = "us-west-1"
 )
 
-type ApiRequest struct {
-	Url string
-}
-
-type ApiResponse struct {
-	RequestId string
-}
-
-func HandleApiEvent(event ApiRequest) (ApiResponse, error) {
+func HandleApiEvent(event toredo.ApiRequest) (toredo.ApiResponse, error) {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
 		SharedConfigState: session.SharedConfigEnable,
@@ -51,7 +43,7 @@ func HandleApiEvent(event ApiRequest) (ApiResponse, error) {
 		fmt.Printf("Error sending message: %v\n", err)
 	}
 
-	response := ApiResponse{RequestId:requestId.String()}
+	response := toredo.ApiResponse{RequestId:requestId.String()}
 	return response, nil
 }
 

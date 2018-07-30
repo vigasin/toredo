@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	ApiUrl      = ""
 	QueueUrl    = "https://sqs.us-west-1.amazonaws.com/009544449203/toredo-downloader-in"
 	Region      = "us-west-1"
 	CredPath    = "/Users/ivigasin/.aws/credentials"
